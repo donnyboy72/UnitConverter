@@ -1,3 +1,4 @@
+
 import java.util.Arrays;
 import java.util.Scanner;
 import java.util.regex.Pattern;
@@ -45,15 +46,10 @@ public class UnitConverter {
 			}
 			
 			String[] inputSplitted = input.split(" ");//split input into an array
-			boolean checkedUnit = checkUnit(inputSplitted);
-			
-			if(checkedUnit == false)
-			{
-				System.err.println("One of your units is not in our list");
-				continue;
-			}
+			checkUnit(inputSplitted);
 			
 			double value = Integer.parseInt(inputSplitted[3]);//create a double instead of string for input
+			checkNumber(value);
 			
 			double newValue = convertInput(inputSplitted[1],inputSplitted[2],value);
 			System.out.printf("%n%.2f %s is %.2f %s%n",value,inputSplitted[1],newValue,inputSplitted[2]);
@@ -67,15 +63,25 @@ public class UnitConverter {
 		}
 		catch(Exception e)//check for everything!
 		{
-			System.err.println("You're input did not match the correct format " + e.toString());
+			System.err.println(e.toString());
 		}
 		System.out.println("end");
 	}
 	
+	private static void checkNumber(double value) {
+		boolean goodNum = false;
+		if(value > 0)
+		{
+			goodNum =true;
+		}
+		if(goodNum == false)
+		{
+			throw new IllegalArgumentException("Number to convert must be greater than 0");
+		}
+	}
+
 	//this is where the math happens
 	private static double convertInput(String unitFrom, String unitTo, double value) {
-		System.out.println(value);
-		System.out.println(value * .3048);
 		double newValue = 0;
 		if(Arrays.asList(length).contains(unitFrom)) 
 		{
@@ -229,73 +235,48 @@ public class UnitConverter {
 		{
 			switch(unitFrom)
 			{
-				case "meters","meter","m":
+				case "celsius", "c":
 					switch(unitTo)
 					{
-						case"meters","meter", "m":
+						case"celsius", "c":
 							newValue = value;
 							break;
-						case "foot", "feet","ft":
-							newValue = value * 3.28084;
+						case "fahrenheit","f":
+							newValue = (value * (9/5)) + 32;
 							break;
-						case "kilometer","km","kilometers":
-							newValue = value * .001;
-							break;
-						case"mile","miles":
-							newValue = value * .000621;
+						case "kelvin","k":
+							newValue = value + 273.15;
 							break;
 					}
 					break;
-				case "foot","feet","ft":
+				case "fahrenheit","f":
 					switch(unitTo)
 					{
-						case"meters","meter", "m":
-							newValue = value * .3048;
+						case"celsius", "c":
+							newValue = (value-32) * (5/9);
 							break;
-						case "foot", "feet","ft":
+						case "fahrenheit","f":
 							newValue = value;
 							break;
-						case "kilometer","km","kilometers":
-							newValue = value * .0003048;
-							break;
-						case"mile","miles":
-							newValue = value * 0.000189394;
+						case "kelvin","k":
+							newValue = (value-32) * (5/9) + 273.15;
 							break;
 					}
 					break;
-				case "kilometer","kilometers","km":
+				case "kelvin","k":
 					switch(unitTo)
 					{
-						case"meters","meter", "m":
-							newValue = value * 1000;
+						case"celsius", "c":
+							newValue = value - 273.15;
 							break;
-						case "foot", "feet","ft":
-							newValue = value * 3280.84;
+						case "fahrenheit","f":
+							newValue = (value - 273.15) * (9/5) + 32;
 							break;
-						case "kilometer","km","kilometers":
+						case "kelvin","k":
 							newValue = value;
-							break;
-						case"mile","miles":
-							newValue = value * 0.621371;
 							break;
 					}
 					break;
-				case "mile","miles":
-					switch(unitTo)
-					{
-						case"meters","meter", "m":
-							newValue = value * 1609.34;
-							break;
-						case "foot", "feet","ft":
-							newValue = value * 5280;
-							break;
-						case "kilometer","km","kilometers":
-							newValue = value * 1.60934;
-							break;
-						case"mile","miles":
-							newValue = value;
-							break;
-					}
 			}
 		}
 		else if(Arrays.asList(currency).contains(unitFrom)) 
@@ -379,7 +360,7 @@ public class UnitConverter {
 
 	//this method checks if units are in the list we have to offer. Since the list are broken up into 
 	//their own category we know that the unit converges will only happen within the correct ones.
-	private static boolean checkUnit(String[] inputSplitted) {
+	private static void checkUnit(String[] inputSplitted) {
 		boolean isGood = false;
 		if(inputSplitted.length == 4) //this checks if the input values for one converges
 		{
@@ -435,7 +416,10 @@ public class UnitConverter {
 				isGood = true;
 			}
 		}
-		return isGood;
+		if(isGood == false)
+		{
+			throw new IllegalArgumentException("One of your units is not in our list or units do not match");
+		}
 	}
 
 	
